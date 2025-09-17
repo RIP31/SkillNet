@@ -1,0 +1,139 @@
+@model SkillNet.Models.UserProfile
+
+<div class="card-body p-4 position-relative">
+    <!-- Availability Badge -->
+    <span class="availability-badge badge bg-success">
+        @Model.HoursPerWeek hrs/week
+    </span>
+
+    <!-- Profile Picture & Basic Info -->
+    <div class="text-center mb-4">
+        <div class="position-relative d-inline-block">
+            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center" 
+                 style="width: 80px; height: 80px; font-size: 1.5rem; font-weight: bold;">
+                @if (!string.IsNullOrEmpty(Model.FullName))
+                {
+                    @Model.FullName.Split(' ').Select(n => n.FirstOrDefault()).Take(2).Aggregate("", (acc, c) => acc + c)
+                }
+                else
+                {
+                    <i class="bi bi-person"></i>
+                }
+            </div>
+        </div>
+        
+        <h5 class="mb-1 mt-3">@Model.FullName</h5>
+        
+        @if (!string.IsNullOrEmpty(Model.Title))
+        {
+            <p class="text-muted mb-2">@Model.Title</p>
+        }
+        
+        @if (!string.IsNullOrEmpty(Model.Email))
+        {
+            <p class="text-muted small mb-0">
+                <i class="bi bi-envelope me-1"></i>@Model.Email
+            </p>
+        }
+    </div>
+
+    <!-- Bio -->
+    @if (!string.IsNullOrEmpty(Model.Bio))
+    {
+        <div class="mb-3">
+            <p class="text-muted small" style="line-height: 1.5;">
+                @(Model.Bio.Length > 120 ? Model.Bio.Substring(0, 120) + "..." : Model.Bio)
+            </p>
+        </div>
+    }
+
+    <!-- Skills Section -->
+    @if (Model.UserSkills != null && Model.UserSkills.Any())
+    {
+        <div class="mb-4">
+            <h6 class="fw-semibold mb-3">
+                <i class="bi bi-star me-2"></i>Skills
+            </h6>
+            <div class="skills-container">
+                @foreach (var userSkill in Model.UserSkills.Take(6))
+                {
+                    <span class="skill-badge @userSkill.ProficiencyLevel?.ToLower()">
+                        @userSkill.Skill?.Name
+                        @if (!string.IsNullOrEmpty(userSkill.ProficiencyLevel))
+                        {
+                            <small class="fw-normal">(@userSkill.ProficiencyLevel)</small>
+                        }
+                    </span>
+                }
+                @if (Model.UserSkills.Count() > 6)
+                {
+                    <span class="skill-badge" style="background-color: #f8f9fa; color: #6c757d;">
+                        +@(Model.UserSkills.Count() - 6) more
+                    </span>
+                }
+            </div>
+        </div>
+    }
+
+    <!-- Looking For & Availability -->
+    <div class="row mb-3">
+        @if (!string.IsNullOrEmpty(Model.LookingFor))
+        {
+            <div class="col-12 mb-2">
+                <small class="text-muted d-block">
+                    <i class="bi bi-search me-1"></i>Looking for
+                </small>
+                <span class="badge bg-light text-dark">@Model.LookingFor</span>
+            </div>
+        }
+        
+        <div class="col-12">
+            <small class="text-muted d-block">
+                <i class="bi bi-clock me-1"></i>Availability
+            </small>
+            <span class="badge @(Model.HoursPerWeek >= 20 ? "bg-success" : Model.HoursPerWeek >= 10 ? "bg-warning text-dark" : "bg-secondary")">
+                @Model.HoursPerWeek hours per week
+            </span>
+        </div>
+    </div>
+
+    <!-- Connect Button -->
+    @if (User.Identity.IsAuthenticated)
+    {
+        <div class="d-grid gap-2">
+            <button class="btn btn-primary btn-sm connect-btn" data-user-id="@Model.Id">
+                <i class="bi bi-person-plus me-2"></i>Connect
+            </button>
+        </div>
+    }
+    else
+    {
+        <div class="d-grid gap-2">
+            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-primary btn-sm">
+                <i class="bi bi-person-plus me-2"></i>Login to Connect
+            </a>
+        </div>
+    }
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            $('.connect-btn').click(function(e) {
+                e.preventDefault();
+                var button = $(this);
+
+                // Change button to show request sent
+                button.removeClass('btn-primary').addClass('btn-secondary');
+                button.html('<i class="bi bi-clock me-2"></i>Request Sent');
+                button.prop('disabled', true);
+
+                // Show success message
+                $('<div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">' +
+                  '<strong>Success!</strong> Connection request sent successfully.' +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                  '</div>').appendTo('body').delay(3000).fadeOut(500, function() { $(this).remove(); });
+            });
+        });
+    </script>
+}

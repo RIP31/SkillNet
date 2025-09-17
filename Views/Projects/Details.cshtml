@@ -1,0 +1,291 @@
+@model SkillNet.Models.Project
+@using Microsoft.AspNetCore.Identity
+@inject UserManager<SkillNet.Models.ApplicationUser> UserManager
+
+@{
+    ViewData["Title"] = Model.Title + " - Project Details";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Main Content -->
+        <div class="col-lg-8">
+            <!-- Project Header -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4">
+                    <div class="d-flex justify-content-between align-items-start mb-3">
+                        <div class="flex-grow-1">
+                            <h1 class="h3 fw-bold mb-2">@Model.Title</h1>
+                            <div class="d-flex align-items-center text-muted">
+                                <span class="badge @(Model.ProjectType == "Startup" ? "bg-danger" : 
+                                                     Model.ProjectType == "Freelance" ? "bg-success" : 
+                                                     Model.ProjectType == "Open Source" ? "bg-info" : "bg-primary") me-3">
+                                    @Model.ProjectType
+                                </span>
+                                <small>
+                                    <i class="bi bi-calendar me-1"></i>
+                                    Posted @Model.CreatedDate.ToString("MMMM dd, yyyy")
+                                </small>
+                            </div>
+                        </div>
+                        
+                        @if (User.Identity.IsAuthenticated)
+                        {
+                            <div class="dropdown">
+                                <button class="btn btn-outline-secondary btn-sm dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                    <i class="bi bi-three-dots"></i>
+                                </button>
+                                <ul class="dropdown-menu">
+                                    @if (Model.CreatedById == UserManager.GetUserId(User))
+                                    {
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-pencil me-2"></i>Edit Project</a></li>
+                                        <li><hr class="dropdown-divider"></li>
+                                        <li><a class="dropdown-item text-danger" href="#"><i class="bi bi-trash me-2"></i>Delete Project</a></li>
+                                    }
+                                    else
+                                    {
+                                        <li><a class="dropdown-item" href="#"><i class="bi bi-flag me-2"></i>Report Project</a></li>
+                                    }
+                                </ul>
+                            </div>
+                        }
+                    </div>
+
+                    <!-- Project Description -->
+                    @if (!string.IsNullOrEmpty(Model.Description))
+                    {
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3">About This Project</h6>
+                            <p class="text-muted" style="line-height: 1.6;">@Model.Description</p>
+                        </div>
+                    }
+
+                    <!-- Skills Required -->
+                    @if (Model.ProjectSkills != null && Model.ProjectSkills.Any())
+                    {
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3">
+                                <i class="bi bi-star me-2"></i>Skills Required
+                            </h6>
+                            <div class="skills-container">
+                                @foreach (var projectSkill in Model.ProjectSkills)
+                                {
+                                    <span class="skill-badge expert">@projectSkill.Skill?.Name</span>
+                                }
+                            </div>
+                        </div>
+                    }
+
+                    <!-- Looking For -->
+                    @if (!string.IsNullOrEmpty(Model.LookingFor))
+                    {
+                        <div class="mb-4">
+                            <h6 class="fw-semibold mb-3">
+                                <i class="bi bi-search me-2"></i>Looking For
+                            </h6>
+                            <p class="text-muted">@Model.LookingFor</p>
+                        </div>
+                    }
+
+                    <!-- Action Buttons -->
+                    @if (User.Identity.IsAuthenticated && Model.CreatedById != UserManager.GetUserId(User))
+                    {
+                        <div class="d-flex gap-3">
+                            <button class="btn btn-primary collaborate-btn" data-project-id="@Model.Id">
+                                <i class="bi bi-handshake me-2"></i>Express Interest
+                            </button>
+                            <a asp-controller="Messages" asp-action="Index" asp-route-userId="@Model.CreatedById" 
+                               class="btn btn-outline-primary">
+                                <i class="bi bi-chat me-2"></i>Message Owner
+                            </a>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Comments/Discussion Section (Placeholder) -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-chat-dots me-2"></i>Discussion
+                    </h5>
+                </div>
+                <div class="card-body">
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <div class="mb-4">
+                            <textarea class="form-control" rows="3" placeholder="Ask questions or express interest in this project..."></textarea>
+                            <div class="d-flex justify-content-end mt-2">
+                                <button class="btn btn-primary btn-sm">
+                                    <i class="bi bi-send me-1"></i>Post Comment
+                                </button>
+                            </div>
+                        </div>
+                    }
+                    
+                    <div class="text-center text-muted py-4">
+                        <i class="bi bi-chat display-4 text-muted mb-3"></i>
+                        <p>No comments yet. Be the first to ask a question or show interest!</p>
+                        @if (!User.Identity.IsAuthenticated)
+                        {
+                            <a asp-area="Identity" asp-page="/Account/Login" class="btn btn-outline-primary">
+                                Login to Comment
+                            </a>
+                        }
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Sidebar -->
+        <div class="col-lg-4">
+            <!-- Project Owner -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body p-4 text-center">
+                    <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center mx-auto mb-3" 
+                         style="width: 80px; height: 80px; font-size: 1.5rem;">
+                        @if (!string.IsNullOrEmpty(Model.CreatedBy?.DisplayName))
+                        {
+                            @Model.CreatedBy.DisplayName.Split(' ').Select(n => n.FirstOrDefault()).Take(2).Aggregate("", (acc, c) => acc + c)
+                        }
+                        else
+                        {
+                            <i class="bi bi-person"></i>
+                        }
+                    </div>
+                    <h6 class="fw-semibold mb-1">@(Model.CreatedBy?.DisplayName ?? Model.CreatedBy?.UserName ?? "Anonymous")</h6>
+                    <small class="text-muted">Project Owner</small>
+                    
+                    @if (!string.IsNullOrEmpty(Model.CreatedBy?.Location))
+                    {
+                        <p class="text-muted small mt-2 mb-0">
+                            <i class="bi bi-geo-alt me-1"></i>@Model.CreatedBy.Location
+                        </p>
+                    }
+
+                    @if (User.Identity.IsAuthenticated && Model.CreatedById != UserManager.GetUserId(User))
+                    {
+                        <div class="d-grid gap-2 mt-3">
+                            <button class="btn btn-outline-primary btn-sm connect-owner" data-user-id="@Model.CreatedById">
+                                <i class="bi bi-person-plus me-2"></i>Connect
+                            </button>
+                        </div>
+                    }
+                </div>
+            </div>
+
+            <!-- Project Details -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-info-circle me-2"></i>Project Details
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    @if (!string.IsNullOrEmpty(Model.EstimatedDuration))
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted">Duration:</small>
+                            <span class="badge bg-light text-dark">@Model.EstimatedDuration</span>
+                        </div>
+                    }
+                    
+                    @if (!string.IsNullOrEmpty(Model.CompensationType))
+                    {
+                        <div class="d-flex justify-content-between align-items-center mb-3">
+                            <small class="text-muted">Compensation:</small>
+                            <span class="badge @(Model.CompensationType == "Paid" ? "bg-success" : 
+                                                 Model.CompensationType == "Equity" ? "bg-warning text-dark" : "bg-secondary")">
+                                @Model.CompensationType
+                            </span>
+                        </div>
+                    }
+
+                    @if (!string.IsNullOrEmpty(Model.CompensationDetails))
+                    {
+                        <div class="mb-3">
+                            <small class="text-muted d-block">Compensation Details:</small>
+                            <p class="small mb-0">@Model.CompensationDetails</p>
+                        </div>
+                    }
+
+                    <div class="d-flex justify-content-between align-items-center">
+                        <small class="text-muted">Posted:</small>
+                        <small>@Model.CreatedDate.ToString("MMM dd, yyyy")</small>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Similar Projects -->
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h6 class="mb-0">
+                        <i class="bi bi-collection me-2"></i>Similar Projects
+                    </h6>
+                </div>
+                <div class="card-body p-4">
+                    <p class="text-muted small mb-3">Discover other projects that might interest you</p>
+                    
+                    <!-- Placeholder for similar projects -->
+                    <div class="text-center text-muted">
+                        <i class="bi bi-search display-6"></i>
+                        <p class="small">Similar projects will appear here</p>
+                        <a asp-controller="Search" asp-action="Projects" class="btn btn-outline-primary btn-sm">
+                            Browse All Projects
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Express Interest Button
+            $('.collaborate-btn').click(function(e) {
+                e.preventDefault();
+                var projectId = $(this).data('project-id');
+                var button = $(this);
+                
+                button.removeClass('btn-primary').addClass('btn-secondary');
+                button.html('<i class="bi bi-check me-2"></i>Interest Sent');
+                button.prop('disabled', true);
+                
+                $('<div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">' +
+                  '<strong>Success!</strong> Your interest has been sent to the project owner.' +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                  '</div>').appendTo('body').delay(4000).fadeOut(500, function() { $(this).remove(); });
+            });
+
+            // Connect with Owner Button
+            $('.connect-owner').click(function(e) {
+                e.preventDefault();
+                var userId = $(this).data('user-id');
+                var button = $(this);
+                
+                $.ajax({
+                    url: '/Connections/SendRequest',
+                    method: 'POST',
+                    data: { receiverId: userId },
+                    headers: {
+                        'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                    },
+                    success: function(response) {
+                        button.removeClass('btn-outline-primary').addClass('btn-secondary');
+                        button.html('<i class="bi bi-clock me-2"></i>Request Sent');
+                        button.prop('disabled', true);
+                    },
+                    error: function(xhr) {
+                        var errorMessage = xhr.responseText || 'An error occurred';
+                        $('<div class="alert alert-danger alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">' +
+                          '<strong>Error!</strong> ' + errorMessage +
+                          '<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\"></button>' +
+                          '</div>').appendTo('body').delay(3000).fadeOut(500, function() { $(this).remove(); });
+                    }
+                });
+            });
+        });
+    </script>
+}

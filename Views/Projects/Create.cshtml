@@ -1,0 +1,219 @@
+@model SkillNet.Models.Project
+
+@{
+    ViewData["Title"] = "Create Project - SkillNet";
+}
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h4 class="mb-0">
+                        <i class="bi bi-plus-circle me-2"></i>Create New Project
+                    </h4>
+                    <p class="text-muted mb-0">Share your project idea and find collaborators</p>
+                </div>
+                <div class="card-body p-4">
+                    <form asp-action="Create" method="post">
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
+
+                        <!-- Project Title -->
+                        <div class="mb-4">
+                            <label asp-for="Title" class="form-label fw-semibold">
+                                <i class="bi bi-card-heading me-1"></i>Project Title *
+                            </label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter a compelling project title">
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <!-- Project Description -->
+                        <div class="mb-4">
+                            <label asp-for="Description" class="form-label fw-semibold">
+                                <i class="bi bi-card-text me-1"></i>Description
+                            </label>
+                            <textarea asp-for="Description" class="form-control" rows="4" 
+                                     placeholder="Describe your project, goals, and what you're looking to achieve"></textarea>
+                            <small class="form-text text-muted">Be specific about what you're building and your vision</small>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <!-- Project Type & Looking For -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="ProjectType" class="form-label fw-semibold">
+                                    <i class="bi bi-tag me-1"></i>Project Type *
+                                </label>
+                                <select asp-for="ProjectType" class="form-select">
+                                    <option value="">Select project type...</option>
+                                    <option value="Startup">Startup</option>
+                                    <option value="Side Project">Side Project</option>
+                                    <option value="Freelance">Freelance</option>
+                                    <option value="Open Source">Open Source</option>
+                                </select>
+                                <span asp-validation-for="ProjectType" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="LookingFor" class="form-label fw-semibold">
+                                    <i class="bi bi-search me-1"></i>Looking For
+                                </label>
+                                <input asp-for="LookingFor" class="form-control" 
+                                       placeholder="e.g., Frontend Developer, UI/UX Designer">
+                                <span asp-validation-for="LookingFor" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Duration & Compensation -->
+                        <div class="row mb-4">
+                            <div class="col-md-6">
+                                <label asp-for="EstimatedDuration" class="form-label fw-semibold">
+                                    <i class="bi bi-clock me-1"></i>Estimated Duration
+                                </label>
+                                <select asp-for="EstimatedDuration" class="form-select">
+                                    <option value="">Select duration...</option>
+                                    <option value="Less than 1 month">Less than 1 month</option>
+                                    <option value="1-3 months">1-3 months</option>
+                                    <option value="3-6 months">3-6 months</option>
+                                    <option value="6+ months">6+ months</option>
+                                    <option value="Ongoing">Ongoing</option>
+                                </select>
+                                <span asp-validation-for="EstimatedDuration" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label asp-for="CompensationType" class="form-label fw-semibold">
+                                    <i class="bi bi-currency-dollar me-1"></i>Compensation Type
+                                </label>
+                                <select asp-for="CompensationType" class="form-select">
+                                    <option value="">Select compensation...</option>
+                                    <option value="Paid">Paid</option>
+                                    <option value="Equity">Equity</option>
+                                    <option value="Volunteer">Volunteer</option>
+                                    <option value="Revenue Share">Revenue Share</option>
+                                </select>
+                                <span asp-validation-for="CompensationType" class="text-danger"></span>
+                            </div>
+                        </div>
+
+                        <!-- Compensation Details -->
+                        <div class="mb-4">
+                            <label asp-for="CompensationDetails" class="form-label fw-semibold">
+                                <i class="bi bi-info-circle me-1"></i>Compensation Details
+                            </label>
+                            <textarea asp-for="CompensationDetails" class="form-control" rows="2" 
+                                     placeholder="Provide details about compensation, budget, equity percentage, etc."></textarea>
+                            <span asp-validation-for="CompensationDetails" class="text-danger"></span>
+                        </div>
+
+                        <!-- Skills Required -->
+                        <div class="mb-4">
+                            <label class="form-label fw-semibold">
+                                <i class="bi bi-star me-1"></i>Skills Required
+                            </label>
+                            <p class="text-muted small mb-3">Select the skills you need for this project</p>
+                            
+                            <div class="row">
+                                @if (ViewBag.Skills != null)
+                                {
+                                    @foreach (var skill in (List<SkillNet.Models.Skill>)ViewBag.Skills)
+                                    {
+                                        <div class="col-md-4 col-sm-6 mb-2">
+                                            <div class="form-check">
+                                                <input class="form-check-input skill-checkbox" type="checkbox" 
+                                                       name="selectedSkills" value="@skill.Id" id="skill_@skill.Id">
+                                                <label class="form-check-label" for="skill_@skill.Id">
+                                                    @skill.Name
+                                                    <small class="text-muted">(@skill.Category)</small>
+                                                </label>
+                                            </div>
+                                        </div>
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <!-- Action Buttons -->
+                        <div class="d-flex gap-3">
+                            <button type="submit" class="btn btn-primary px-4">
+                                <i class="bi bi-check me-2"></i>Create Project
+                            </button>
+                            <a asp-action="Index" class="btn btn-outline-secondary px-4">
+                                <i class="bi bi-arrow-left me-2"></i>Cancel
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <!-- Tips Card -->
+            <div class="card mt-4 bg-light border-0">
+                <div class="card-body">
+                    <h6 class="fw-semibold mb-3">
+                        <i class="bi bi-lightbulb text-warning me-2"></i>Tips for a Great Project Post
+                    </h6>
+                    <ul class="mb-0 text-muted small">
+                        <li>Write a clear, descriptive title that captures the essence of your project</li>
+                        <li>Include specific details about what you're building and your goals</li>
+                        <li>Be transparent about compensation and time expectations</li>
+                        <li>Select relevant skills to attract the right collaborators</li>
+                        <li>Mention any existing progress, team members, or resources</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        $(document).ready(function() {
+            // Add visual feedback for selected skills
+            $('.skill-checkbox').change(function() {
+                var label = $(this).next('label');
+                if (this.checked) {
+                    label.addClass('fw-semibold text-primary');
+                } else {
+                    label.removeClass('fw-semibold text-primary');
+                }
+            });
+
+            // Form validation feedback
+            $('form').on('submit', function(e) {
+                var isValid = true;
+                var title = $('#Title').val().trim();
+                
+                if (!title) {
+                    isValid = false;
+                    $('#Title').addClass('is-invalid');
+                } else {
+                    $('#Title').removeClass('is-invalid');
+                }
+
+                if (!isValid) {
+                    e.preventDefault();
+                    $('html, body').animate({
+                        scrollTop: $('.is-invalid:first').offset().top - 100
+                    }, 500);
+                }
+            });
+
+            // Character counter for description
+            $('#Description').on('input', function() {
+                var maxLength = 500;
+                var currentLength = $(this).val().length;
+                
+                if (!$(this).next('.char-counter').length) {
+                    $(this).after('<small class="char-counter text-muted"></small>');
+                }
+                
+                var counter = $(this).next('.char-counter');
+                counter.text(currentLength + ' / ' + maxLength + ' characters');
+                
+                if (currentLength > maxLength) {
+                    counter.addClass('text-danger').removeClass('text-muted');
+                } else {
+                    counter.addClass('text-muted').removeClass('text-danger');
+                }
+            });
+        });
+    </script>
+}

@@ -1,0 +1,188 @@
+@model PaginatedList<SkillNet.Models.UserProfile>
+
+@{
+    ViewData["Title"] = "Find Talent - SkillNet";
+}
+
+<div class="container my-5">
+    <div class="row">
+        <!-- Search Filters Sidebar -->
+        <div class="col-lg-3 mb-4">
+            <div class="card">
+                <div class="card-header">
+                    <h5 class="mb-0"><i class="bi bi-funnel me-2"></i>Search Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" asp-action="FindTalent">
+                        <div class="mb-3">
+                            <label for="searchTerm" class="form-label">Search Term</label>
+                            <input type="text" class="form-control" id="searchTerm" name="searchTerm" 
+                                   value="@ViewBag.SearchTerm" placeholder="Skills, title, name...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="skillFilter" class="form-label">Skill</label>
+                            <select class="form-select" id="skillFilter" name="skillFilter">
+                                <option value="">All Skills</option>
+                                @if (ViewBag.Skills != null)
+                                {
+                                    @foreach (var skill in (List<SkillNet.Models.Skill>)ViewBag.Skills)
+                                    {
+                                        <option value="@skill.Name" selected="@(ViewBag.SkillFilter == skill.Name)">
+                                            @skill.Name
+                                        </option>
+                                    }
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="availabilityFilter" class="form-label">Availability</label>
+                            <select class="form-select" id="availabilityFilter" name="availabilityFilter">
+                                <option value="">Any Availability</option>
+                                <option value="1-10" selected="@(ViewBag.AvailabilityFilter == "1-10")">1-10 hours/week</option>
+                                <option value="10-20" selected="@(ViewBag.AvailabilityFilter == "10-20")">10-20 hours/week</option>
+                                <option value="20+" selected="@(ViewBag.AvailabilityFilter == "20+")">20+ hours/week</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-2"></i>Search
+                        </button>
+                        <a href="@Url.Action("FindTalent")" class="btn btn-outline-secondary w-100 mt-2">
+                            Clear Filters
+                        </a>
+                    </form>
+                </div>
+            </div>
+        </div>
+        
+        @section Scripts {
+            <script>
+                $(document).ready(function() {
+                    $('.card-footer .btn-primary').click(function(e) {
+                        e.preventDefault();
+                        var button = $(this);
+        
+                        // Change button to show request sent
+                        button.removeClass('btn-primary').addClass('btn-secondary');
+                        button.html('<i class="bi bi-clock me-1"></i>Request Sent');
+                        button.prop('disabled', true);
+        
+                        // Show success message
+                        $('<div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">' +
+                          '<strong>Success!</strong> Connection request sent successfully.' +
+                          '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                          '</div>').appendTo('body').delay(3000).fadeOut(500, function() { $(this).remove(); });
+                    });
+                });
+            </script>
+        }
+
+        <!-- Results -->
+        <div class="col-lg-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2 class="mb-0">Find Talent</h2>
+                <div class="text-muted">
+                    Found @Model.TotalCount professionals
+                </div>
+            </div>
+
+            @if (Model.Any())
+            {
+                <div class="row">
+                    @foreach (var user in Model)
+                    {
+                        <div class="col-lg-6 mb-4">
+                            <div class="card profile-card h-100">
+                                <div class="availability-badge">
+                                    <span class="badge bg-success">@user.HoursPerWeek hrs/week</span>
+                                </div>
+                                <div class="card-body">
+                                    <div class="d-flex align-items-center mb-3">
+                                        <div class="flex-shrink-0">
+                                            <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 50px; height: 50px;">
+                                                <span class="text-white fw-bold">@user.FullName.Substring(0, 1)</span>
+                                            </div>
+                                        </div>
+                                        <div class="flex-grow-1 ms-3">
+                                            <h5 class="card-title mb-1">@user.FullName</h5>
+                                            <p class="text-muted mb-0">@user.Title</p>
+                                            <small class="text-primary">Looking for: @user.LookingFor</small>
+                                        </div>
+                                    </div>
+
+                                    @if (user.Bio != null)
+                                    {
+                                        <p class="card-text">@user.Bio?.Substring(0, Math.Min(user.Bio.Length, 100))@(user.Bio?.Length > 100 ? "..." : "")</p>
+                                    }
+
+                                    @if (user.UserSkills != null && user.UserSkills.Any())
+                                    {
+                                        <div class="mb-3">
+                                            <div>
+                                                @foreach (var skill in user.UserSkills.Take(5))
+                                                {
+                                                    <span class="skill-badge @skill.ProficiencyLevel.ToLower()"
+                                                          title="@skill.ProficiencyLevel level">
+                                                        @skill.Skill.Name
+                                                    </span>
+                                                }
+                                                @if (user.UserSkills.Count() > 5)
+                                                {
+                                                    <span class="skill-badge text-muted">+@(user.UserSkills.Count() - 5) more</span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+                                </div>
+                                <div class="card-footer bg-transparent">
+                                    <div class="d-flex gap-2">
+                                        <button class="btn btn-primary btn-sm flex-fill">
+                                            <i class="bi bi-person-plus me-1"></i> Connect
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- Simple Pagination -->
+                <nav aria-label="Search results pagination">
+                    <ul class="pagination justify-content-center">
+                        @if (Model.HasPreviousPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("FindTalent", new { pageIndex = Model.PageIndex - 1 })">Previous</a>
+                            </li>
+                        }
+
+                        @for (int i = Math.Max(1, Model.PageIndex - 2); i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
+                        {
+                            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                                <a class="page-link" href="@Url.Action("FindTalent", new { pageIndex = i })">@i</a>
+                            </li>
+                        }
+
+                        @if (Model.HasNextPage)
+                        {
+                            <li class="page-item">
+                                <a class="page-link" href="@Url.Action("FindTalent", new { pageIndex = Model.PageIndex + 1 })">Next</a>
+                            </li>
+                        }
+                    </ul>
+                </nav>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <h3 class="text-muted mt-3">No results found</h3>
+                    <p class="text-muted">Try adjusting your search filters or search term.</p>
+                    <a href="@Url.Action("FindTalent")" class="btn btn-primary">Clear All Filters</a>
+                </div>
+            }
+        </div>
+    </div>
+</div>

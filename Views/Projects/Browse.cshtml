@@ -1,0 +1,328 @@
+@model PaginatedList<SkillNet.Models.Project>
+
+@{
+    ViewData["Title"] = "Browse Projects";
+    var userInterests = ViewBag.UserInterests as List<int> ?? new List<int>();
+    var categories = ViewBag.Categories as List<string> ?? new List<string>();
+    var currentCategory = ViewBag.CurrentCategory as string ?? "";
+    var currentSearch = ViewBag.CurrentSearch as string ?? "";
+}
+
+<div class="container mt-4">
+    <div class="row mb-4">
+        <div class="col-md-12">
+            <div class="card shadow-sm">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-search mr-2"></i>Browse Projects</h3>
+                </div>
+                <div class="card-body">
+                    <form method="get" asp-action="Browse" class="mb-4">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label for="search">Search Projects</label>
+                                    <input type="text" name="search" id="search" class="form-control" value="@currentSearch" placeholder="Search by title, description, or skills...">
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="form-group">
+                                    <label for="category">Filter by Category</label>
+                                    <select name="category" id="category" class="form-control">
+                                        <option value="">All Categories</option>
+                                        @foreach (var cat in categories)
+                                        {
+                                            <option value="@cat" selected="@(cat == currentCategory ? "selected" : null)">@cat</option>
+                                        }
+                                    </select>
+                                </div>
+                            </div>
+                            <div class="col-md-2">
+                                <div class="form-group">
+                                    <label>&nbsp;</label>
+                                    <button type="submit" class="btn btn-primary form-control">
+                                        <i class="fas fa-search mr-2"></i>Search
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    @if (Model.Count == 0)
+    {
+        <div class="text-center py-5">
+            <i class="fas fa-project-diagram fa-4x text-muted mb-3"></i>
+            <h4 class="text-muted">No projects found</h4>
+            <p class="text-muted">Try adjusting your search criteria or check back later for new projects.</p>
+        </div>
+    }
+    else
+    {
+        <div class="row">
+            @foreach (var project in Model)
+            {
+                <div class="col-md-6 col-lg-4 mb-4">
+                    <div class="card h-100 shadow-sm project-card">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-start mb-3">
+                                <h5 class="card-title mb-0">@project.Title</h5>
+                                @if (!string.IsNullOrEmpty(project.ProjectType))
+                                {
+                                    <span class="badge badge-secondary">@project.ProjectType</span>
+                                }
+                            </div>
+
+                            <p class="card-text text-muted small">
+                                <i class="fas fa-user mr-1"></i>
+                                by @(project.CreatedBy.DisplayName ?? project.CreatedBy.UserName)
+                            </p>
+
+                            <p class="card-text">
+                                @if (project.Description?.Length > 120)
+                                {
+                                    @(project.Description.Substring(0, 120) + "...")
+                                }
+                                else
+                                {
+                                    @project.Description
+                                }
+                            </p>
+
+                            @if (!string.IsNullOrEmpty(project.LookingFor))
+                            {
+                                <div class="mb-3">
+                                    <strong class="text-primary">Looking for:</strong>
+                                    <p class="small mb-0">@project.LookingFor</p>
+                                </div>
+                            }
+
+                            @if (project.ProjectSkills?.Any() == true)
+                            {
+                                <div class="mb-3">
+                                    <div class="d-flex flex-wrap">
+                                        @foreach (var skill in project.ProjectSkills.Take(3))
+                                        {
+                                            <span class="badge badge-light mr-1 mb-1">
+                                                <i class="@skill.Skill.Icon mr-1"></i>@skill.Skill.Name
+                                            </span>
+                                        }
+                                        @if (project.ProjectSkills.Count() > 3)
+                                        {
+                                            <span class="badge badge-light">+@(project.ProjectSkills.Count() - 3) more</span>
+                                        }
+                                    </div>
+                                </div>
+                            }
+
+                            <div class="row text-center small text-muted mb-3">
+                                @if (!string.IsNullOrEmpty(project.EstimatedDuration))
+                                {
+                                    <div class="col">
+                                        <i class="fas fa-clock"></i><br>
+                                        @project.EstimatedDuration
+                                    </div>
+                                }
+                                @if (!string.IsNullOrEmpty(project.CompensationType))
+                                {
+                                    <div class="col">
+                                        <i class="fas fa-dollar-sign"></i><br>
+                                        @project.CompensationType
+                                    </div>
+                                }
+                                <div class="col">
+                                    <i class="fas fa-calendar"></i><br>
+                                    @project.CreatedDate.ToString("MMM dd")
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="card-footer bg-white border-top-0">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <a asp-action="Details" asp-route-id="@project.Id" class="btn btn-outline-primary btn-sm">
+                                    <i class="fas fa-eye mr-1"></i>View Details
+                                </a>
+                                
+                                @if (userInterests.Contains(project.Id))
+                                {
+                                    <button class="btn btn-success btn-sm" disabled>
+                                        <i class="fas fa-check mr-1"></i>Interest Sent
+                                    </button>
+                                }
+                                else
+                                {
+                                    <button class="btn btn-primary btn-sm" 
+                                            onclick="showInterestModal(@project.Id, '@project.Title')">
+                                        <i class="fas fa-heart mr-1"></i>Show Interest
+                                    </button>
+                                }
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Pagination -->
+        <nav aria-label="Projects pagination" class="mt-4">
+            <ul class="pagination justify-content-center">
+                <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                    <a class="page-link" 
+                       asp-action="Browse" 
+                       asp-route-pageIndex="@(Model.PageIndex - 1)"
+                       asp-route-category="@currentCategory"
+                       asp-route-search="@currentSearch">Previous</a>
+                </li>
+                
+                @for (int i = Math.Max(1, Model.PageIndex - 2); i <= Math.Min(Model.TotalPages, Model.PageIndex + 2); i++)
+                {
+                    <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                        <a class="page-link" 
+                           asp-action="Browse" 
+                           asp-route-pageIndex="@i"
+                           asp-route-category="@currentCategory"
+                           asp-route-search="@currentSearch">@i</a>
+                    </li>
+                }
+                
+                <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                    <a class="page-link" 
+                       asp-action="Browse" 
+                       asp-route-pageIndex="@(Model.PageIndex + 1)"
+                       asp-route-category="@currentCategory"
+                       asp-route-search="@currentSearch">Next</a>
+                </li>
+            </ul>
+        </nav>
+    }
+</div>
+
+<!-- Interest Modal -->
+<div class="modal fade" id="interestModal" tabindex="-1" aria-labelledby="interestModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="interestModalLabel">Express Interest</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+            <div class="modal-body">
+                <p>You're about to express interest in: <strong id="projectTitle"></strong></p>
+                <form id="interestForm">
+                    <input type="hidden" id="projectId" name="projectId" />
+                    <div class="form-group">
+                        <label for="message">Message (optional)</label>
+                        <textarea class="form-control" id="message" name="message" rows="3" 
+                                  placeholder="Tell the project owner why you're interested..."></textarea>
+                    </div>
+                </form>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-dismiss="modal">Cancel</button>
+                <button type="button" class="btn btn-primary" onclick="sendInterest()">
+                    <i class="fas fa-heart mr-2"></i>Send Interest
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="~/lib/signalr/dist/browser/signalr.min.js"></script>
+    <script>
+        let currentProjectId = 0;
+
+        function showInterestModal(projectId, projectTitle) {
+            currentProjectId = projectId;
+            document.getElementById('projectId').value = projectId;
+            document.getElementById('projectTitle').textContent = projectTitle;
+            $('#interestModal').modal('show');
+        }
+
+        function sendInterest() {
+            const projectId = document.getElementById('projectId').value;
+            const message = document.getElementById('message').value;
+
+            fetch('/Projects/SendInterest', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                    'RequestVerificationToken': $('input[name="__RequestVerificationToken"]').val()
+                },
+                body: `projectId=${projectId}&message=${encodeURIComponent(message)}`
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.message) {
+                    // Update UI to show interest sent
+                    const button = $(`button[onclick="showInterestModal(${projectId}, '${$('#projectTitle').text()}')"]`);
+                    button.replaceWith(`
+                        <button class="btn btn-success btn-sm" disabled>
+                            <i class="fas fa-check mr-1"></i>Interest Sent
+                        </button>
+                    `);
+                    
+                    $('#interestModal').modal('hide');
+                    
+                    // Show success message
+                    showNotification('Success', data.message, 'success');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                showNotification('Error', 'Failed to send interest. Please try again.', 'error');
+            });
+        }
+
+        function showNotification(title, message, type) {
+            const alertClass = type === 'success' ? 'alert-success' : 'alert-danger';
+            const alertHtml = `
+                <div class="alert ${alertClass} alert-dismissible fade show position-fixed" 
+                     style="top: 20px; right: 20px; z-index: 9999; max-width: 400px;" role="alert">
+                    <strong>${title}:</strong> ${message}
+                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
+                        <span aria-hidden="true">&times;</span>
+                    </button>
+                </div>
+            `;
+            $('body').append(alertHtml);
+            setTimeout(() => {
+                $('.alert').fadeOut();
+            }, 5000);
+        }
+
+        // SignalR connection for real-time notifications
+        const connection = new signalR.HubConnectionBuilder()
+            .withUrl("/projectHub")
+            .build();
+
+        connection.start().then(function () {
+            console.log("Connected to project hub");
+        }).catch(function (err) {
+            console.error(err.toString());
+        });
+
+        // Clear form when modal is hidden
+        $('#interestModal').on('hidden.bs.modal', function () {
+            document.getElementById('message').value = '';
+        });
+    </script>
+}
+
+<style>
+    .project-card:hover {
+        transform: translateY(-2px);
+        transition: transform 0.2s;
+    }
+    
+    .project-card .card-body {
+        padding: 1.5rem;
+    }
+    
+    .badge {
+        font-size: 0.75em;
+    }
+</style>

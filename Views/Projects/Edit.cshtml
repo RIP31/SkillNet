@@ -1,0 +1,145 @@
+@model SkillNet.Models.Project
+
+@{
+    ViewData["Title"] = "Edit Project";
+}
+
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8 offset-md-2">
+            <div class="card shadow">
+                <div class="card-header bg-primary text-white">
+                    <h3 class="mb-0"><i class="fas fa-edit mr-2"></i>Edit Project</h3>
+                </div>
+                <div class="card-body">
+                    <form asp-action="Edit" method="post">
+                        <input asp-for="Id" type="hidden" />
+                        <div asp-validation-summary="ModelOnly" class="text-danger"></div>
+
+                        <div class="form-group">
+                            <label asp-for="Title" class="control-label"></label>
+                            <input asp-for="Title" class="form-control" placeholder="Enter project title" />
+                            <span asp-validation-for="Title" class="text-danger"></span>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="Description" class="control-label"></label>
+                            <textarea asp-for="Description" class="form-control" rows="4" placeholder="Describe your project in detail"></textarea>
+                            <span asp-validation-for="Description" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="ProjectType" class="control-label"></label>
+                                    <select asp-for="ProjectType" class="form-control">
+                                        <option value="">Select project type</option>
+                                        <option value="Startup">Startup</option>
+                                        <option value="Side Project">Side Project</option>
+                                        <option value="Freelance">Freelance</option>
+                                        <option value="Open Source">Open Source</option>
+                                        <option value="Non-Profit">Non-Profit</option>
+                                        <option value="Enterprise">Enterprise</option>
+                                    </select>
+                                    <span asp-validation-for="ProjectType" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="EstimatedDuration" class="control-label"></label>
+                                    <select asp-for="EstimatedDuration" class="form-control">
+                                        <option value="">Select duration</option>
+                                        <option value="1-2 weeks">1-2 weeks</option>
+                                        <option value="1 month">1 month</option>
+                                        <option value="2-3 months">2-3 months</option>
+                                        <option value="3-6 months">3-6 months</option>
+                                        <option value="6+ months">6+ months</option>
+                                        <option value="Ongoing">Ongoing</option>
+                                    </select>
+                                    <span asp-validation-for="EstimatedDuration" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label asp-for="LookingFor" class="control-label"></label>
+                            <textarea asp-for="LookingFor" class="form-control" rows="3" placeholder="What skills or expertise are you looking for?"></textarea>
+                            <span asp-validation-for="LookingFor" class="text-danger"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CompensationType" class="control-label"></label>
+                                    <select asp-for="CompensationType" class="form-control">
+                                        <option value="">Select compensation type</option>
+                                        <option value="Paid">Paid</option>
+                                        <option value="Equity">Equity</option>
+                                        <option value="Revenue Share">Revenue Share</option>
+                                        <option value="Volunteer">Volunteer</option>
+                                        <option value="To be discussed">To be discussed</option>
+                                    </select>
+                                    <span asp-validation-for="CompensationType" class="text-danger"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group">
+                                    <label asp-for="CompensationDetails" class="control-label"></label>
+                                    <input asp-for="CompensationDetails" class="form-control" placeholder="e.g., $50/hour, 5% equity" />
+                                    <span asp-validation-for="CompensationDetails" class="text-danger"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group">
+                            <label class="control-label">Required Skills</label>
+                            <div class="row">
+                                @if (ViewBag.Skills != null)
+                                {
+                                    var skills = (List<SkillNet.Models.Skill>)ViewBag.Skills;
+                                    var selectedSkills = ViewBag.SelectedSkills as int[] ?? new int[0];
+                                    int count = 0;
+                                    foreach (var skill in skills.OrderBy(s => s.Category).ThenBy(s => s.Name))
+                                    {
+                                        <div class="col-md-4 col-sm-6">
+                                            <div class="form-check">
+                                                <input type="checkbox" name="selectedSkills" value="@skill.Id" 
+                                                       class="form-check-input" id="skill@(skill.Id)" 
+                                                       @(selectedSkills.Contains(skill.Id) ? "checked" : "") />
+                                                <label class="form-check-label" for="skill@(skill.Id)">
+                                                    <i class="@skill.Icon mr-2"></i>@skill.Name
+                                                    @if (!string.IsNullOrEmpty(skill.Category))
+                                                    {
+                                                        <small class="text-muted">(@skill.Category)</small>
+                                                    }
+                                                </label>
+                                            </div>
+                                        </div>
+                                        count++;
+                                        if (count % 3 == 0)
+                                        {
+                                            @:</div><div class="row">
+                                        }
+                                    }
+                                }
+                            </div>
+                        </div>
+
+                        <div class="form-group mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg">
+                                <i class="fas fa-save mr-2"></i>Update Project
+                            </button>
+                            <a asp-action="Index" class="btn btn-secondary btn-lg ml-2">
+                                <i class="fas fa-arrow-left mr-2"></i>Back to My Projects
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

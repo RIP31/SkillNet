@@ -1,0 +1,164 @@
+﻿@model IEnumerable<SkillNet.Models.UserProfile>
+
+@{
+    ViewData["Title"] = "SkillNet - Find Your Team";
+}
+
+<!-- Hero Section -->
+<section class="hero-section">
+    <div class="container">
+        <div class="row align-items-center">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold mb-4">Connect. Collaborate. Create.</h1>
+                <p class="lead mb-4">SkillNet helps you find the perfect team members for your next project. Whether you're building a startup, working on a side project, or looking for skilled collaborators.</p>
+                <div class="d-flex flex-wrap gap-2">
+                    <a class="btn btn-light btn-lg rounded-pill px-4" href="/Home/Create" role="button">
+                        <i class="bi bi-person-plus me-2"></i>Join Now
+                    </a>
+                    <a class="btn btn-outline-light btn-lg rounded-pill px-4" href="#profiles" role="button">
+                        <i class="bi bi-people me-2"></i>Browse Talent
+                    </a>
+                </div>
+            </div>
+            <div class="col-lg-6 text-center d-none d-lg-block">
+                <img src="https://images.unsplash.com/photo-1573164713714-d95e436ab8d6?ixlib=rb-4.0.3&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=2069&q=80" alt="Collaboration" class="img-fluid rounded-3" style="max-height: 400px;">
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Features Section -->
+<section class="py-5">
+    <div class="container">
+        <div class="text-center mb-5">
+            <h2 class="fw-bold">How It Works</h2>
+            <p class="text-muted">Find your perfect team in three simple steps</p>
+        </div>
+        <div class="row g-4">
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-person-badge"></i>
+                    </div>
+                    <h5>1. Create Profile</h5>
+                    <p class="text-muted">Showcase your skills, experience, and availability for projects.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-search"></i>
+                    </div>
+                    <h5>2. Find Talent</h5>
+                    <p class="text-muted">Browse through skilled professionals based on your project needs.</p>
+                </div>
+            </div>
+            <div class="col-md-4">
+                <div class="text-center">
+                    <div class="feature-icon">
+                        <i class="bi bi-chat-dots"></i>
+                    </div>
+                    <h5>3. Connect & Build</h5>
+                    <p class="text-muted">Reach out to potential collaborators and start building amazing projects.</p>
+                </div>
+            </div>
+        </div>
+    </div>
+</section>
+
+<!-- Profiles Section -->
+<section id="profiles" class="py-5 bg-light">
+    <div class="container">
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Featured Profiles</h2>
+            <div class="d-flex">
+                <input type="text" class="form-control me-2" placeholder="Search skills..." style="max-width: 250px;">
+                <select class="form-select" style="max-width: 200px;">
+                    <option selected>Filter by availability</option>
+                    <option>1-10 hours/week</option>
+                    <option>10-20 hours/week</option>
+                    <option>20+ hours/week</option>
+                </select>
+            </div>
+        </div>
+
+        @if (Model.Any())
+        {
+            <div class="row">
+                @foreach (var user in Model)
+                {
+                    <div class="col-xl-4 col-md-6 mb-4">
+                        <div class="card profile-card h-100">
+                            <div class="availability-badge">
+                                <span class="badge bg-success">@user.HoursPerWeek hrs/week available</span>
+                            </div>
+                            <div class="card-body">
+                                <div class="d-flex align-items-center mb-3">
+                                    <div class="flex-shrink-0">
+                                        <div class="bg-primary rounded-circle d-flex align-items-center justify-content-center" style="width: 60px; height: 60px;">
+                                            <span class="text-white fw-bold fs-5">@user.FullName.Substring(0, 1)</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex-grow-1 ms-3">
+                                        <h5 class="card-title mb-0">@user.FullName</h5>
+                                        <p class="text-muted mb-0">@user.Title</p>
+                                        <small class="text-primary">
+                                            <i class="bi bi-geo-alt"></i> Looking for: @user.LookingFor
+                                        </small>
+                                    </div>
+                                </div>
+
+                                <p class="card-text">@user.Bio</p>
+
+                                @if (user.UserSkills != null && user.UserSkills.Any())
+                                {
+                                    <div class="mb-3">
+                                        <h6 class="mb-2">Skills:</h6>
+                                        <div>
+                                            @foreach (var skill in user.UserSkills)
+                                            {
+                                                <span class="skill-badge @skill.ProficiencyLevel.ToLower()">
+                                                    @skill.Skill.Name <small>(@skill.ProficiencyLevel)</small>
+                                                </span>
+                                            }
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                            <div class="card-footer bg-transparent d-flex justify-content-between">
+                                <a href="mailto:@user.Email" class="btn btn-outline-primary btn-sm">
+                                    <i class="bi bi-envelope me-1"></i> Contact
+                                </a>
+                                <button class="btn btn-outline-secondary btn-sm">
+                                    <i class="bi bi-bookmark me-1"></i> Save
+                                </button>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <i class="bi bi-people display-1 text-muted"></i>
+                <h3 class="text-muted mt-3">No profiles yet</h3>
+                <p class="text-muted">Be the first to create a profile and showcase your skills!</p>
+                <a href="/Home/Create" class="btn btn-primary mt-2">Create Your Profile</a>
+            </div>
+        }
+    </div>
+</section>
+
+<!-- Call to Action -->
+<section class="py-5">
+    <div class="container">
+        <div class="bg-primary text-white rounded-3 p-5 text-center">
+            <h2 class="fw-bold mb-3">Ready to Find Your Team?</h2>
+            <p class="lead mb-4">Join thousands of professionals already building amazing projects together</p>
+            <a href="/Home/Create" class="btn btn-light btn-lg rounded-pill px-4">
+                <i class="bi bi-lightning me-2"></i>Get Started Now
+            </a>
+        </div>
+    </div>
+</section>

@@ -1,0 +1,128 @@
+﻿@model SkillNet.Models.UserProfile
+@{
+    ViewData["Title"] = "Create Your Profile";
+    var skills = ViewBag.Skills as List<SkillNet.Models.Skill>;
+}
+
+<!-- Header -->
+<div class="py-4 bg-light">
+    <div class="container">
+        <nav aria-label="breadcrumb">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Create Profile</li>
+            </ol>
+        </nav>
+    </div>
+</div>
+
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-lg-8">
+            <div class="card shadow-sm border-0">
+                <div class="card-header bg-white py-4 border-0">
+                    <h2 class="fw-bold text-center mb-0">Create Your Profile</h2>
+                    <p class="text-muted text-center">Showcase your skills and connect with amazing projects</p>
+                </div>
+                <div class="card-body p-5">
+                    <form asp-action="Create">
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label asp-for="FullName" class="form-label fw-semibold"></label>
+                                    <input asp-for="FullName" class="form-control form-control-lg" placeholder="Enter your full name" />
+                                    <span asp-validation-for="FullName" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label asp-for="Email" class="form-label fw-semibold"></label>
+                                    <input asp-for="Email" class="form-control form-control-lg" placeholder="your.email@example.com" />
+                                    <span asp-validation-for="Email" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Title" class="form-label fw-semibold"></label>
+                            <input asp-for="Title" class="form-control form-control-lg" placeholder="e.g. Full Stack Developer, UX Designer, Marketing Specialist" />
+                            <span asp-validation-for="Title" class="text-danger small"></span>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label asp-for="Bio" class="form-label fw-semibold"></label>
+                            <textarea asp-for="Bio" class="form-control" rows="4" placeholder="Tell us about yourself, your experience, and what you're passionate about..."></textarea>
+                            <span asp-validation-for="Bio" class="text-danger small"></span>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label asp-for="HoursPerWeek" class="form-label fw-semibold"></label>
+                                    <input asp-for="HoursPerWeek" class="form-control form-control-lg" />
+                                    <div class="form-text">How many hours per week are you available for projects?</div>
+                                    <span asp-validation-for="HoursPerWeek" class="text-danger small"></span>
+                                </div>
+                            </div>
+                            <div class="col-md-6">
+                                <div class="form-group mb-4">
+                                    <label asp-for="LookingFor" class="form-label fw-semibold"></label>
+                                    <select asp-for="LookingFor" class="form-select form-select-lg">
+                                        <option value="" selected disabled>What are you looking for?</option>
+                                        <option value="Co-founder">Co-founder</option>
+                                        <option value="Project Team">Project Team</option>
+                                        <option value="Freelance Gig">Freelance Gig</option>
+                                        <option value="Mentorship">Mentorship</option>
+                                        <option value="Learning Opportunity">Learning Opportunity</option>
+                                    </select>
+                                    <span asp-validation-for="LookingFor" class="text-danger small"></span>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="form-group mb-4">
+                            <label class="form-label fw-semibold">Add Your Skills</label>
+                            <p class="text-muted small">Select your skills and specify your proficiency level</p>
+
+                            <div class="row">
+                                @for (int i = 0; i < skills.Count; i++)
+                                {
+                                    <div class="col-md-6 mb-3">
+                                        <div class="form-check">
+                                            <input class="form-check-input skill-checkbox" type="checkbox"
+                                                   name="selectedSkills" value="@skills[i].Id" id="skill-@skills[i].Id" />
+                                            <label class="form-check-label fw-normal" for="skill-@skills[i].Id">
+                                                @skills[i].Name
+                                                <span class="text-muted small">(@skills[i].Category)</span>
+                                            </label>
+                                            <select name="proficiencyLevels" class="form-select form-select-sm proficiency-level mt-1" style="display: none; width: 150px;">
+                                                <option value="Beginner">Beginner</option>
+                                                <option value="Intermediate">Intermediate</option>
+                                                <option value="Expert">Expert</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                }
+                            </div>
+                        </div>
+
+                        <div class="d-grid gap-2 d-md-flex justify-content-md-end mt-4">
+                            <a href="/" class="btn btn-outline-secondary btn-lg px-4 me-md-2">Cancel</a>
+                            <button type="submit" class="btn btn-primary btn-lg px-4">
+                                <i class="bi bi-check-circle me-2"></i>Create Profile
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+
+            <div class="text-center mt-4">
+                <p class="text-muted">Already have an account? <a href="#" class="text-primary">Sign in</a></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

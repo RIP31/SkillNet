@@ -1,0 +1,342 @@
+@model List<SkillNet.Models.Project>
+
+@{
+    ViewData["Title"] = "Browse Projects - SkillNet";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <!-- Filter Sidebar -->
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">
+                        <i class="bi bi-funnel me-2"></i>Filters
+                    </h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" asp-action="Projects">
+                        <div class="mb-3">
+                            <label class="form-label">Search Projects</label>
+                            <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" 
+                                   class="form-control" placeholder="Project title, description...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Project Type</label>
+                            <select name="projectTypeFilter" class="form-select">
+                                <option value="">All Types</option>
+                                <option value="Startup" selected="@(ViewBag.ProjectTypeFilter == "Startup")">Startup</option>
+                                <option value="Side Project" selected="@(ViewBag.ProjectTypeFilter == "Side Project")">Side Project</option>
+                                <option value="Freelance" selected="@(ViewBag.ProjectTypeFilter == "Freelance")">Freelance</option>
+                                <option value="Open Source" selected="@(ViewBag.ProjectTypeFilter == "Open Source")">Open Source</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Compensation</label>
+                            <select name="compensationFilter" class="form-select">
+                                <option value="">Any Compensation</option>
+                                <option value="Equity">Equity</option>
+                                <option value="Paid">Paid</option>
+                                <option value="Volunteer">Volunteer</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">
+                            <i class="bi bi-search me-2"></i>Apply Filters
+                        </button>
+                        <a asp-action="Projects" class="btn btn-outline-secondary w-100 mt-2">Clear All</a>
+                    </form>
+                </div>
+            </div>
+
+            @if (User.Identity.IsAuthenticated)
+            {
+                <div class="card shadow-sm mt-4">
+                    <div class="card-body text-center">
+                        <i class="bi bi-plus-circle display-4 text-primary mb-3"></i>
+                        <h5>Have a Project?</h5>
+                        <p class="text-muted small">Post your project and find the perfect collaborators</p>
+                        <a asp-controller="Projects" asp-action="Create" class="btn btn-success w-100">
+                            <i class="bi bi-plus me-2"></i>Create Project
+                        </a>
+                    </div>
+                </div>
+            }
+        </div>
+
+        <!-- Main Content -->
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <div>
+                    <h2>
+                        <i class="bi bi-briefcase me-2"></i>Browse Projects
+                    </h2>
+                    <span class="text-muted">@Model.Count projects available</span>
+                </div>
+                
+                <!-- View Toggle -->
+                <div class="btn-group" role="group">
+                    <input type="radio" class="btn-check" name="viewType" id="gridView" autocomplete="off" checked>
+                    <label class="btn btn-outline-secondary" for="gridView">
+                        <i class="bi bi-grid"></i>
+                    </label>
+                    <input type="radio" class="btn-check" name="viewType" id="listView" autocomplete="off">
+                    <label class="btn btn-outline-secondary" for="listView">
+                        <i class="bi bi-list"></i>
+                    </label>
+                </div>
+            </div>
+
+            @if (Model.Any())
+            {
+                <!-- Grid View -->
+                <div id="projects-grid" class="row">
+                    @foreach (var project in Model)
+                    {
+                        <div class="col-lg-6 mb-4">
+                            <div class="card project-card h-100 shadow-sm">
+                                <div class="card-body p-4 position-relative">
+                                    <!-- Project Type Badge -->
+                                    <span class="position-absolute top-0 end-0 m-3">
+                                        <span class="badge @(project.ProjectType == "Startup" ? "bg-danger" : 
+                                                              project.ProjectType == "Freelance" ? "bg-success" : 
+                                                              project.ProjectType == "Open Source" ? "bg-info" : "bg-primary")">
+                                            @project.ProjectType
+                                        </span>
+                                    </span>
+
+                                    <!-- Project Title & Description -->
+                                    <div class="mb-3">
+                                        <h5 class="card-title fw-bold mb-2">@project.Title</h5>
+                                        <p class="text-muted small mb-0">
+                                            @if (!string.IsNullOrEmpty(project.Description))
+                                            {
+                                                @(project.Description.Length > 150 ? project.Description.Substring(0, 150) + "..." : project.Description)
+                                            }
+                                        </p>
+                                    </div>
+
+                                    <!-- Skills Required -->
+                                    @if (project.ProjectSkills != null && project.ProjectSkills.Any())
+                                    {
+                                        <div class="mb-3">
+                                            <small class="text-muted d-block mb-2">
+                                                <i class="bi bi-star me-1"></i>Skills Needed
+                                            </small>
+                                            <div class="skills-container">
+                                                @foreach (var projectSkill in project.ProjectSkills.Take(4))
+                                                {
+                                                    <span class="skill-badge expert">@projectSkill.Skill?.Name</span>
+                                                }
+                                                @if (project.ProjectSkills.Count() > 4)
+                                                {
+                                                    <span class="skill-badge" style="background-color: #f8f9fa; color: #6c757d;">
+                                                        +@(project.ProjectSkills.Count() - 4)
+                                                    </span>
+                                                }
+                                            </div>
+                                        </div>
+                                    }
+
+                                    <!-- Project Details -->
+                                    <div class="row g-2 mb-3">
+                                        @if (!string.IsNullOrEmpty(project.EstimatedDuration))
+                                        {
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">Duration</small>
+                                                <span class="badge bg-light text-dark">@project.EstimatedDuration</span>
+                                            </div>
+                                        }
+                                        
+                                        @if (!string.IsNullOrEmpty(project.CompensationType))
+                                        {
+                                            <div class="col-6">
+                                                <small class="text-muted d-block">Compensation</small>
+                                                <span class="badge @(project.CompensationType == "Paid" ? "bg-success" : 
+                                                                     project.CompensationType == "Equity" ? "bg-warning text-dark" : "bg-secondary")">
+                                                    @project.CompensationType
+                                                </span>
+                                            </div>
+                                        }
+                                    </div>
+
+                                    <!-- Project Creator & Date -->
+                                    <div class="d-flex justify-content-between align-items-center mb-3">
+                                        <div class="d-flex align-items-center">
+                                            <div class="bg-primary text-white rounded-circle d-flex align-items-center justify-content-center me-2" 
+                                                 style="width: 32px; height: 32px; font-size: 0.8rem;">
+                                                @if (!string.IsNullOrEmpty(project.CreatedBy?.DisplayName))
+                                                {
+                                                    @project.CreatedBy.DisplayName.Split(' ').Select(n => n.FirstOrDefault()).Take(2).Aggregate("", (acc, c) => acc + c)
+                                                }
+                                                else
+                                                {
+                                                    <i class="bi bi-person"></i>
+                                                }
+                                            </div>
+                                            <div>
+                                                <small class="fw-semibold d-block">@(project.CreatedBy?.DisplayName ?? project.CreatedBy?.UserName ?? "Anonymous")</small>
+                                                <small class="text-muted">@project.CreatedDate.ToString("MMM dd, yyyy")</small>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    <!-- Action Buttons -->
+                                    <div class="d-grid gap-2">
+                                        <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" 
+                                           class="btn btn-primary btn-sm">
+                                            <i class="bi bi-eye me-2"></i>View Details
+                                        </a>
+                                        @if (User.Identity.IsAuthenticated)
+                                        {
+                                            <button class="btn btn-outline-success btn-sm collaborate-btn" 
+                                                    data-project-id="@project.Id">
+                                                <i class="bi bi-handshake me-2"></i>Express Interest
+                                            </button>
+                                        }
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+
+                <!-- List View (Hidden by default) -->
+                <div id="projects-list" class="d-none">
+                    @foreach (var project in Model)
+                    {
+                        <div class="card project-card mb-3 shadow-sm">
+                            <div class="card-body p-4">
+                                <div class="row align-items-center">
+                                    <div class="col-md-8">
+                                        <div class="d-flex align-items-center mb-2">
+                                            <h5 class="card-title mb-0 me-3">@project.Title</h5>
+                                            <span class="badge @(project.ProjectType == "Startup" ? "bg-danger" : 
+                                                                  project.ProjectType == "Freelance" ? "bg-success" : 
+                                                                  project.ProjectType == "Open Source" ? "bg-info" : "bg-primary")">
+                                                @project.ProjectType
+                                            </span>
+                                        </div>
+                                        
+                                        <p class="text-muted mb-2">
+                                            @if (!string.IsNullOrEmpty(project.Description))
+                                            {
+                                                @(project.Description.Length > 200 ? project.Description.Substring(0, 200) + "..." : project.Description)
+                                            }
+                                        </p>
+                                        
+                                        @if (project.ProjectSkills != null && project.ProjectSkills.Any())
+                                        {
+                                            <div class="skills-container mb-2">
+                                                @foreach (var projectSkill in project.ProjectSkills.Take(6))
+                                                {
+                                                    <span class="skill-badge expert">@projectSkill.Skill?.Name</span>
+                                                }
+                                            </div>
+                                        }
+                                        
+                                        <small class="text-muted">
+                                            <i class="bi bi-person me-1"></i>@(project.CreatedBy?.DisplayName ?? "Anonymous")
+                                            <i class="bi bi-calendar ms-3 me-1"></i>@project.CreatedDate.ToString("MMM dd, yyyy")
+                                        </small>
+                                    </div>
+                                    
+                                    <div class="col-md-4 text-end">
+                                        <div class="mb-2">
+                                            @if (!string.IsNullOrEmpty(project.CompensationType))
+                                            {
+                                                <span class="badge @(project.CompensationType == "Paid" ? "bg-success" : 
+                                                                     project.CompensationType == "Equity" ? "bg-warning text-dark" : "bg-secondary") mb-1">
+                                                    @project.CompensationType
+                                                </span>
+                                            }
+                                        </div>
+                                        
+                                        <div class="d-grid gap-2">
+                                            <a asp-controller="Projects" asp-action="Details" asp-route-id="@project.Id" 
+                                               class="btn btn-primary btn-sm">View Details</a>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-briefcase display-1 text-muted"></i>
+                    <h3 class="text-muted mt-3">No projects found</h3>
+                    <p class="text-muted">Try adjusting your search criteria or browse all projects.</p>
+                    <a href="/Search/Projects" class="btn btn-primary mt-2">
+                        <i class="bi bi-arrow-clockwise me-2"></i>Clear Filters
+                    </a>
+                    @if (User.Identity.IsAuthenticated)
+                    {
+                        <a asp-controller="Projects" asp-action="Create" class="btn btn-success mt-2">
+                            <i class="bi bi-plus me-2"></i>Create Project
+                        </a>
+                    }
+                </div>
+            }
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <style>
+        .project-card {
+            transition: transform 0.3s ease, box-shadow 0.3s ease;
+            border: none;
+            border-radius: 1rem;
+        }
+        
+        .project-card:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 1rem 2.5rem rgba(0, 0, 0, 0.15) !important;
+        }
+        
+        .skills-container .skill-badge {
+            margin: 0.15rem;
+        }
+    </style>
+    
+    <script>
+        $(document).ready(function() {
+            // View Toggle Functionality
+            $('#gridView').change(function() {
+                if (this.checked) {
+                    $('#projects-grid').removeClass('d-none');
+                    $('#projects-list').addClass('d-none');
+                }
+            });
+            
+            $('#listView').change(function() {
+                if (this.checked) {
+                    $('#projects-list').removeClass('d-none');
+                    $('#projects-grid').addClass('d-none');
+                }
+            });
+            
+            // Collaborate Button
+            $('.collaborate-btn').click(function(e) {
+                e.preventDefault();
+                var projectId = $(this).data('project-id');
+                var button = $(this);
+                
+                // For now, just show a message - you can implement actual collaboration logic
+                button.removeClass('btn-outline-success').addClass('btn-secondary');
+                button.html('<i class="bi bi-check me-2"></i>Interest Sent');
+                button.prop('disabled', true);
+                
+                $('<div class="alert alert-success alert-dismissible fade show position-fixed" style="top: 20px; right: 20px; z-index: 9999;">' +
+                  '<strong>Success!</strong> Your interest has been sent to the project owner.' +
+                  '<button type="button" class="btn-close" data-bs-dismiss="alert"></button>' +
+                  '</div>').appendTo('body').delay(4000).fadeOut(500, function() { $(this).remove(); });
+            });
+        });
+    </script>
+}

@@ -1,0 +1,229 @@
+@page
+@model LoginModel
+
+@{
+    ViewData["Title"] = "Welcome Back - SkillNet";
+    Layout = "_Layout";
+}
+
+<div class="container-fluid p-0" style="min-height: 100vh; background: #f8fafc;">
+    <div class="row g-0 min-vh-100">
+        <!-- Left Side - Hero Section -->
+        <div class="col-lg-6 d-none d-lg-flex" style="background: linear-gradient(135deg, var(--gradient-start) 0%, var(--gradient-end) 100%);">
+            <div class="d-flex flex-column justify-content-center align-items-center text-white p-5">
+                <div class="text-center mb-5">
+                    <i class="bi bi-cpu display-1 mb-4" style="font-size: 5rem;"></i>
+                    <h1 class="display-4 fw-bold mb-3">SkillNet</h1>
+                    <p class="lead mb-4">Connect with talented professionals and build amazing projects together</p>
+                </div>
+                
+                <div class="row text-center w-100" style="max-width: 400px;">
+                    <div class="col-4">
+                        <div class="feature-icon bg-white bg-opacity-20 mb-3">
+                            <i class="bi bi-people"></i>
+                        </div>
+                        <h6 class="fw-semibold">Network</h6>
+                        <small class="text-white-50">Connect with skilled professionals</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="feature-icon bg-white bg-opacity-20 mb-3">
+                            <i class="bi bi-briefcase"></i>
+                        </div>
+                        <h6 class="fw-semibold">Collaborate</h6>
+                        <small class="text-white-50">Work on exciting projects</small>
+                    </div>
+                    <div class="col-4">
+                        <div class="feature-icon bg-white bg-opacity-20 mb-3">
+                            <i class="bi bi-trophy"></i>
+                        </div>
+                        <h6 class="fw-semibold">Grow</h6>
+                        <small class="text-white-50">Advance your career</small>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Right Side - Login Form -->
+        <div class="col-lg-6">
+            <div class="d-flex flex-column justify-content-center min-vh-100 p-4">
+                <div class="mx-auto" style="max-width: 420px; width: 100%;">
+                    <!-- Mobile Header -->
+                    <div class="text-center mb-5 d-lg-none">
+                        <i class="bi bi-cpu text-primary mb-3" style="font-size: 3rem;"></i>
+                        <h2 class="fw-bold text-dark">SkillNet</h2>
+                    </div>
+                    
+                    <!-- Welcome Header -->
+                    <div class="mb-5">
+                        <h2 class="fw-bold text-dark mb-2">Welcome back!</h2>
+                        <p class="text-muted">Please sign in to your account to continue</p>
+                    </div>
+
+                    <!-- Login Form -->
+                    <form id="account" method="post">
+                        <div asp-validation-summary="All" class="alert alert-danger rounded-3" role="alert"></div>
+                        
+                        <div class="mb-4">
+                            <label asp-for="Input.Email" class="form-label fw-semibold text-dark">
+                                Email Address
+                            </label>
+                            <div class="position-relative">
+                                <i class="bi bi-envelope position-absolute text-muted" style="left: 15px; top: 50%; transform: translateY(-50%); z-index: 10;"></i>
+                                <input asp-for="Input.Email" class="form-control form-control-lg ps-5" 
+                                       style="border-radius: 1rem; border: 2px solid #e9ecef; padding: 1rem 1rem 1rem 3rem;"
+                                       placeholder="Enter your email" autocomplete="username" />
+                            </div>
+                            <span asp-validation-for="Input.Email" class="text-danger small"></span>
+                        </div>
+
+                        <div class="mb-4">
+                            <label asp-for="Input.Password" class="form-label fw-semibold text-dark">
+                                Password
+                            </label>
+                            <div class="position-relative">
+                                <i class="bi bi-lock position-absolute text-muted" style="left: 15px; top: 50%; transform: translateY(-50%); z-index: 10;"></i>
+                                <input asp-for="Input.Password" class="form-control form-control-lg ps-5 pe-5" 
+                                       style="border-radius: 1rem; border: 2px solid #e9ecef; padding: 1rem 3rem 1rem 3rem;"
+                                       placeholder="Enter your password" autocomplete="current-password" />
+                                <button type="button" class="btn btn-link position-absolute password-toggle text-muted" 
+                                        style="right: 15px; top: 50%; transform: translateY(-50%); padding: 0; border: none; background: none; z-index: 10;">
+                                    <i class="bi bi-eye"></i>
+                                </button>
+                            </div>
+                            <span asp-validation-for="Input.Password" class="text-danger small"></span>
+                        </div>
+
+                        <div class="d-flex justify-content-between align-items-center mb-4">
+                            <div class="form-check">
+                                <input asp-for="Input.RememberMe" class="form-check-input" style="border-radius: 0.5rem;" />
+                                <label asp-for="Input.RememberMe" class="form-check-label text-muted">
+                                    Remember me
+                                </label>
+                            </div>
+                            <a id="forgot-password" asp-page="./ForgotPassword" 
+                               class="text-primary text-decoration-none fw-semibold">
+                                Forgot password?
+                            </a>
+                        </div>
+
+                        <div class="d-grid mb-4">
+                            <button type="submit" class="btn btn-primary btn-lg" 
+                                    style="border-radius: 1rem; padding: 1rem; font-weight: 600;">
+                                <i class="bi bi-box-arrow-in-right me-2"></i>
+                                Sign In
+                            </button>
+                        </div>
+                    </form>
+
+                    <!-- Divider -->
+                    <div class="position-relative text-center mb-4">
+                        <hr class="text-muted">
+                        <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+                            Don't have an account?
+                        </span>
+                    </div>
+
+                    <!-- Register Button -->
+                    <div class="d-grid mb-4">
+                        <a asp-page="./Register" asp-route-returnUrl="@Model.ReturnUrl" 
+                           class="btn btn-outline-primary btn-lg" 
+                           style="border-radius: 1rem; padding: 1rem; font-weight: 600;">
+                            <i class="bi bi-person-plus me-2"></i>
+                            Create New Account
+                        </a>
+                    </div>
+
+                    <!-- External Logins -->
+                    @if ((Model.ExternalLogins?.Count ?? 0) > 0)
+                    {
+                        <div class="position-relative text-center mb-3">
+                            <hr class="text-muted">
+                            <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 text-muted small">
+                                Or continue with
+                            </span>
+                        </div>
+                        
+                        <form id="external-account" asp-page="./ExternalLogin" asp-route-returnUrl="@Model.ReturnUrl" method="post">
+                            <div class="d-grid gap-2">
+                                @foreach (var provider in Model.ExternalLogins)
+                                {
+                                    <button type="submit" class="btn btn-outline-secondary btn-lg" 
+                                            style="border-radius: 1rem; padding: 1rem;"
+                                            name="provider" value="@provider.Name" 
+                                            title="Sign in with @provider.DisplayName">
+                                        @provider.DisplayName
+                                    </button>
+                                }
+                            </div>
+                        </form>
+                    }
+                    
+                    <!-- Footer -->
+                    <div class="text-center mt-5">
+                        <p class="text-muted small">
+                            By signing in, you agree to our 
+                            <a href="#" class="text-primary text-decoration-none">Terms of Service</a> and 
+                            <a href="#" class="text-primary text-decoration-none">Privacy Policy</a>
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+    <script>
+        $(document).ready(function() {
+            // Password toggle functionality
+            $('.password-toggle').click(function() {
+                const passwordField = $(this).siblings('input[type="password"], input[type="text"]');
+                const icon = $(this).find('i');
+                
+                if (passwordField.attr('type') === 'password') {
+                    passwordField.attr('type', 'text');
+                    icon.removeClass('bi-eye').addClass('bi-eye-slash');
+                } else {
+                    passwordField.attr('type', 'password');
+                    icon.removeClass('bi-eye-slash').addClass('bi-eye');
+                }
+            });
+
+            // Enhanced form focus effects
+            $('.form-control').on('focus', function() {
+                $(this).css('border-color', 'var(--primary)');
+                $(this).css('box-shadow', '0 0 0 0.25rem rgba(67, 97, 238, 0.15)');
+            }).on('blur', function() {
+                if (!$(this).val()) {
+                    $(this).css('border-color', '#e9ecef');
+                    $(this).css('box-shadow', 'none');
+                }
+            });
+
+            // Loading state for submit button
+            $('form#account').on('submit', function() {
+                const submitBtn = $(this).find('button[type="submit"]');
+                const originalHtml = submitBtn.html();
+                
+                submitBtn.prop('disabled', true);
+                submitBtn.html('<span class="spinner-border spinner-border-sm me-2" role="status"></span>Signing in...');
+                
+                // Re-enable button after 5 seconds (in case of validation errors)
+                setTimeout(function() {
+                    submitBtn.prop('disabled', false);
+                    submitBtn.html(originalHtml);
+                }, 5000);
+            });
+
+            // Smooth animations for form elements
+            $('.form-control').each(function() {
+                $(this).css('transition', 'all 0.3s ease');
+            });
+
+            $('.btn').each(function() {
+                $(this).css('transition', 'all 0.3s ease');
+            });
+        });
+    </script>
+}

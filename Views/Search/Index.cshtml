@@ -1,0 +1,127 @@
+﻿@model PaginatedList<SkillNet.Models.UserProfile>
+
+@{
+    ViewData["Title"] = "Find Talent - SkillNet";
+}
+
+<div class="container py-5">
+    <div class="row">
+        <div class="col-md-3">
+            <div class="card shadow-sm">
+                <div class="card-header bg-white">
+                    <h5 class="mb-0">Filters</h5>
+                </div>
+                <div class="card-body">
+                    <form method="get" asp-action="Index">
+                        <div class="mb-3">
+                            <label class="form-label">Search</label>
+                            <input type="text" name="searchTerm" value="@ViewBag.SearchTerm" class="form-control" placeholder="Name, skills, title...">
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Skills</label>
+                            <select name="skillFilter" class="form-select">
+                                <option value="">All Skills</option>
+                                @foreach (var skill in ViewBag.Skills)
+                                {
+                                    <option value="@skill.Name" selected="@(ViewBag.SkillFilter == skill.Name ? "selected" : null)">@skill.Name</option>
+                                }
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Availability</label>
+                            <select name="availabilityFilter" class="form-select">
+                                <option value="">Any Availability</option>
+                                <option value="1-10" selected="@(ViewBag.AvailabilityFilter == "1-10" ? "selected" : null)">1-10 hours/week</option>
+                                <option value="10-20" selected="@(ViewBag.AvailabilityFilter == "10-20" ? "selected" : null)">10-20 hours/week</option>
+                                <option value="20+" selected="@(ViewBag.AvailabilityFilter == "20+" ? "selected" : null)">20+ hours/week</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-3">
+                            <label class="form-label">Looking For</label>
+                            <select name="lookingForFilter" class="form-select">
+                                <option value="">Anything</option>
+                                <option value="Co-founder" selected="@(ViewBag.LookingForFilter == "Co-founder" ? "selected" : null)">Co-founder</option>
+                                <option value="Project Team" selected="@(ViewBag.LookingForFilter == "Project Team" ? "selected" : null)">Project Team</option>
+                                <option value="Freelance Gig" selected="@(ViewBag.LookingForFilter == "Freelance Gig" ? "selected" : null)">Freelance Gig</option>
+                            </select>
+                        </div>
+
+                        <button type="submit" class="btn btn-primary w-100">Apply Filters</button>
+                        <a asp-action="Index" class="btn btn-outline-secondary w-100 mt-2">Clear All</a>
+                    </form>
+                </div>
+            </div>
+        </div>
+
+        <div class="col-md-9">
+            <div class="d-flex justify-content-between align-items-center mb-4">
+                <h2>Find Talent</h2>
+                <span class="text-muted">@Model.TotalCount results found</span>
+            </div>
+
+            @if (Model.Any())
+            {
+                <div class="row">
+                    @foreach (var user in Model)
+                    {
+                        <div class="col-lg-6 mb-4">
+                            <div class="card profile-card h-100">
+                                <!-- Profile card content (same as before) -->
+                                @await Html.PartialAsync("_ProfileCard", user)
+                            </div>
+                        </div>
+                    }
+                </div>
+            }
+            else
+            {
+                <div class="text-center py-5">
+                    <i class="bi bi-search display-1 text-muted"></i>
+                    <h3 class="text-muted mt-3">No profiles found</h3>
+                    <p class="text-muted">Try adjusting your search criteria or browse all profiles.</p>
+                    <a href="/Search" class="btn btn-primary mt-2">Clear Filters</a>
+                </div>
+            }
+
+            @if (Model.TotalPages > 1)
+            {
+                <nav aria-label="Search results pagination">
+                    <ul class="pagination justify-content-center">
+                        <li class="page-item @(!Model.HasPreviousPage ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-pageIndex="@(Model.PageIndex - 1)"
+                               asp-route-searchTerm="@ViewBag.SearchTerm"
+                               asp-route-skillFilter="@ViewBag.SkillFilter"
+                               asp-route-availabilityFilter="@ViewBag.AvailabilityFilter"
+                               asp-route-lookingForFilter="@ViewBag.LookingForFilter">Previous</a>
+                        </li>
+
+                        @for (int i = 1; i <= Model.TotalPages; i++)
+                        {
+                            <li class="page-item @(i == Model.PageIndex ? "active" : "")">
+                                <a class="page-link" asp-action="Index"
+                                   asp-route-pageIndex="@i"
+                                   asp-route-searchTerm="@ViewBag.SearchTerm"
+                                   asp-route-skillFilter="@ViewBag.SkillFilter"
+                                   asp-route-availabilityFilter="@ViewBag.AvailabilityFilter"
+                                   asp-route-lookingForFilter="@ViewBag.LookingForFilter">@i</a>
+                            </li>
+                        }
+
+                        <li class="page-item @(!Model.HasNextPage ? "disabled" : "")">
+                            <a class="page-link" asp-action="Index"
+                               asp-route-pageIndex="@(Model.PageIndex + 1)"
+                               asp-route-searchTerm="@ViewBag.SearchTerm"
+                               asp-route-skillFilter="@ViewBag.SkillFilter"
+                               asp-route-availabilityFilter="@ViewBag.AvailabilityFilter"
+                               asp-route-lookingForFilter="@ViewBag.LookingForFilter">Next</a>
+                        </li>
+                    </ul>
+                </nav>
+            }
+        </div>
+    </div>
+</div>
